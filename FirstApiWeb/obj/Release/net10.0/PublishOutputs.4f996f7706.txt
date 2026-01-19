@@ -1,0 +1,15 @@
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\FirstApiWeb.exe
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\publish\v3\web.config
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\appsettings.Development.json
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\appsettings.json
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\publish\v3\FirstApiWeb.runtimeconfig.json
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\publish\v3\FirstApiWeb.staticwebassets.endpoints.json
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\FirstApiWeb.dll
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\FirstApiWeb.deps.json
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\FirstApiWeb.runtimeconfig.json
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\FirstApiWeb.pdb
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\Microsoft.AspNetCore.OpenApi.dll
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\Microsoft.OpenApi.dll
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\andrey\RiderProjects\FirstApiWeb\v4\Swashbuckle.AspNetCore.SwaggerUI.dll
