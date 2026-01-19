@@ -7,7 +7,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("react", p =>
-        p.WithOrigins("http://localhost:5173")
+        p.WithOrigins("https://berkovtest.ru", "http://berkovtest.ru")
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
