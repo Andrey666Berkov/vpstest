@@ -12,6 +12,7 @@ public class ProductsController : ControllerBase
         new Product { Id = 1, Name = "Apple", Price = 1.5m },
         new Product { Id = 2, Name = "Bread", Price = 2.2m },
         new Product { Id = 3, Name = "Peta", Price = 3.3m },
+        new Product { Id = 4, Name = "GOGa", Price = 7.7m },
     };
 
     private static int _nextId = 3;
