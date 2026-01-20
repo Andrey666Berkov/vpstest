@@ -1,0 +1,55 @@
+﻿name: Deploy ASP.NET to VPS
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Publish
+        run: dotnet publish -c Release -o out
+
+      - name: Upload release to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "out/*"
+          target: "/tmp/myfirstapp_out"
+
+      - name: Activate release and restart service
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+
+            APP_DIR="/var/www/myfirstapp"
+            RELEASES="$APP_DIR/releases"
+            TS="$(date +%Y%m%d_%H%M%S)"
+            NEW_RELEASE="$RELEASES/$TS"
+
+            mkdir -p "$NEW_RELEASE"
+            cp -r /tmp/myfirstapp_out/out/* "$NEW_RELEASE/"
+
+            ln -sfn "$NEW_RELEASE" "$APP_DIR/current"
+
+            sudo systemctl restart myfirstapp
+            sudo systemctl status myfirstapp --no-pager
