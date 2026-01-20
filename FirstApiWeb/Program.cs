@@ -19,7 +19,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-//..dsf
+//..dsfgb
 
 app.UseCors("react");
 
