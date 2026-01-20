@@ -20,7 +20,7 @@ jobs:
           HOST: ${{ secrets.VPS_HOST }}
           USER: ${{ secrets.VPS_USER }}
           APP_NAME: testapp
-        run: 
+        run: | 
            echo "App=$APP_NAME"
            echo "USER=$VPS_USER"
         
