@@ -21,6 +21,6 @@ jobs:
           USER: ${{ secrets.VPS_USER }}
           APP_NAME: testapp
         run: | 
-           echo "App=$APP_NAME"
-           echo "USER=$USER"
+          echo "App=$APP_NAME"
+          echo "USER=$USER"
         
