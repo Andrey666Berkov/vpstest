@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      # 👇 В репозитории путь может отличаться. Если у тебя в корне есть папка FirstApiWeb — ок.
       PROJECT_PATH: "FirstApiWeb/FirstApiWeb.csproj"
       APP_DIR: "/var/www/myfirstapp"
       SERVICE_NAME: "myfirstapp"
@@ -21,28 +22,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Судя по логу, у тебя net10.0 → ставим SDK 10
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
 
+      - name: Show csproj files (debug)
+        run: find . -maxdepth 6 -name "*.csproj"
+
       - name: Restore
-        run: dotnet restore ${{ env.PROJECT_PATH }}
+        run: dotnet restore "${{ env.PROJECT_PATH }}"
 
       - name: Publish
-        run: dotnet publish ${{ env.PROJECT_PATH }} -c Release -o out
+        run: dotnet publish "${{ env.PROJECT_PATH }}" -c Release -o out
 
       - name: Validate publish output
         run: |
           set -e
           ls -la out
+          echo "DLLs:"
           find out -maxdepth 2 -name "*.dll" -type f
-          if ! find out -maxdepth 2 -name "*.dll" -type f | grep -q .; then
-            echo "ERROR: No DLLs in out/. Check PROJECT_PATH."
+          if ! test -f out/FirstApiWeb.dll; then
+            echo "ERROR: out/FirstApiWeb.dll not found. Check PROJECT_PATH."
             exit 1
           fi
 
-      # Поднимаем SSH-ключ в runner (без appleboy/scp-action)
+      # Поднимаем SSH-ключ в runner
       - name: Start ssh-agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -55,7 +61,7 @@ jobs:
 
       - name: Prepare temp dir on VPS
         run: |
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'set -e; rm -rf /tmp/myfirstapp_publish; mkdir -p /tmp/myfirstapp_publish'
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'set -e; rm -rf /tmp/myfirstapp_publish; mkdir -p /tmp/myfirstapp_publish/out'
 
       - name: Upload publish via rsync
         run: |
@@ -75,12 +81,13 @@ jobs:
             chown -R deploy:deploy "$NEW_RELEASE"
             ln -sfn "$NEW_RELEASE" "$CURRENT"
 
-            sudo systemctl daemon-reload
-            sudo systemctl restart ${{ env.SERVICE_NAME }}
-            sudo systemctl status ${{ env.SERVICE_NAME }} --no-pager
+            sudo /usr/bin/systemctl daemon-reload
+            sudo /usr/bin/systemctl restart ${{ env.SERVICE_NAME }}
+            sudo /usr/bin/systemctl status ${{ env.SERVICE_NAME }} --no-pager
 
             rm -rf /tmp/myfirstapp_publish
 
+            # keep last 5 releases
             cd "$RELEASES"
             ls -1dt */ | tail -n +6 | xargs -r rm -rf
           '
