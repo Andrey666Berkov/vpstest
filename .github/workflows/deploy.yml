@@ -4,6 +4,10 @@ on:
   push:
     branches: ["master"]
 
+concurrency:
+  group: deploy-myfirstapp
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -17,22 +21,56 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      # 1) Restore
       - name: Restore
         run: dotnet restore
 
+      # 2) Publish
+      # ВАЖНО: если у тебя проект не в корне — поменяй путь на свой .csproj
+      # Например: dotnet publish FirstApiWeb/FirstApiWeb.csproj -c Release -o out
       - name: Publish
         run: dotnet publish -c Release -o out
 
+      # 3) Проверка, что publish сделал dll (иначе дальше бессмысленно)
+      - name: Validate publish output
+        run: |
+          set -e
+          echo "Publish output:"
+          ls -la out
+          echo "DLLs found:"
+          find out -maxdepth 2 -name "*.dll" -type f
+          if ! find out -maxdepth 2 -name "*.dll" -type f | grep -q .; then
+            echo "ERROR: No DLLs were produced into out/. Fix dotnet publish path."
+            exit 1
+          fi
+
+      # 4) Подготовка папки на VPS (исправляет типичную ошибку scp-action)
+      - name: Prepare temp dir on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            rm -rf /tmp/myfirstapp_publish
+            mkdir -p /tmp/myfirstapp_publish
+            ls -ld /tmp/myfirstapp_publish
+
+      # 5) Копируем publish на VPS во временную папку
       - name: Upload publish to VPS (/tmp)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "out/*"
+          source: "out/**"
           target: "/tmp/myfirstapp_publish"
+          overwrite: true
+          debug: true
 
-      - name: Create release, switch current, restart service
+      # 6) Активируем релиз: /releases/<ts> -> current, рестартим сервис
+      - name: Activate release and restart service
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -43,14 +81,34 @@ jobs:
 
             APP_DIR="/var/www/myfirstapp"
             RELEASES="$APP_DIR/releases"
+            CURRENT="$APP_DIR/current"
             TS="$(date +%Y%m%d_%H%M%S)"
             NEW_RELEASE="$RELEASES/$TS"
 
+            echo "Creating release: $NEW_RELEASE"
             mkdir -p "$NEW_RELEASE"
+
+            # Переносим файлы из /tmp в релиз
+            # В /tmp/myfirstapp_publish/out лежит результат publish
             cp -r /tmp/myfirstapp_publish/out/* "$NEW_RELEASE/"
 
-            ln -sfn "$NEW_RELEASE" "$APP_DIR/current"
+            # На всякий — права (обычно и так deploy:deploy, но пусть будет)
+            chown -R deploy:deploy "$NEW_RELEASE"
 
+            echo "Switching current -> $NEW_RELEASE"
+            ln -sfn "$NEW_RELEASE" "$CURRENT"
+
+            echo "Restarting systemd service: myfirstapp"
             sudo systemctl daemon-reload
             sudo systemctl restart myfirstapp
             sudo systemctl status myfirstapp --no-pager
+
+            # Чистим /tmp
+            rm -rf /tmp/myfirstapp_publish
+
+            # Оставляем последние 5 релизов, остальные удаляем
+            echo "Cleanup old releases (keep last 5)"
+            cd "$RELEASES"
+            ls -1dt */ | tail -n +6 | xargs -r rm -rf
+
+            echo "Done."
