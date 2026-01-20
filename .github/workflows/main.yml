@@ -2,7 +2,7 @@ name: Hello Actions
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 jobs:
   hello:
