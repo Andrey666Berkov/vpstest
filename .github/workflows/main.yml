@@ -15,5 +15,12 @@ jobs:
       - name: Say hello
         run: echo "Hello from GitHub Actions"
 
-      - name: Test
-        run: ls -la 
+      - name: Print env
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          USER: ${{ secrets.VPS_USER }}
+          APP_NAME: testapp
+        run: 
+           echo "App=$APP_NAME"
+           echo "USER=$VPS_USER"
+        
