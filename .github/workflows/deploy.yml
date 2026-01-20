@@ -1,93 +1,16 @@
-name: Deploy ASP.NET to VPS
+name: Hello Actions
 
 on:
   push:
-    branches: ["master"]
-
-concurrency:
-  group: deploy-myfirstapp
-  cancel-in-progress: true
+    branches: [ "main" ]
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  hello:
+     runs-on: ubuntu-latest
 
-    env:
-      # 👇 В репозитории путь может отличаться. Если у тебя в корне есть папка FirstApiWeb — ок.
-      PROJECT_PATH: "FirstApiWeb/FirstApiWeb.csproj"
-      APP_DIR: "/var/www/myfirstapp"
-      SERVICE_NAME: "myfirstapp"
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # Судя по логу, у тебя net10.0 → ставим SDK 10
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "10.0.x"
-
-      - name: Show csproj files (debug)
-        run: find . -maxdepth 6 -name "*.csproj"
-
-      - name: Restore
-        run: dotnet restore "${{ env.PROJECT_PATH }}"
-
-      - name: Publish
-        run: dotnet publish "${{ env.PROJECT_PATH }}" -c Release -o out
-
-      - name: Validate publish output
-        run: |
-          set -e
-          ls -la out
-          echo "DLLs:"
-          find out -maxdepth 2 -name "*.dll" -type f
-          if ! test -f out/FirstApiWeb.dll; then
-            echo "ERROR: out/FirstApiWeb.dll not found. Check PROJECT_PATH."
-            exit 1
-          fi
-
-      # Поднимаем SSH-ключ в runner
-      - name: Start ssh-agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
-
-      - name: Add VPS to known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Prepare temp dir on VPS
-        run: |
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'set -e; rm -rf /tmp/myfirstapp_publish; mkdir -p /tmp/myfirstapp_publish/out'
-
-      - name: Upload publish via rsync
-        run: |
-          rsync -az --delete out/ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/myfirstapp_publish/out/
-
-      - name: Activate release and restart service
-        run: |
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'set -e
-            APP_DIR="${{ env.APP_DIR }}"
-            RELEASES="$APP_DIR/releases"
-            CURRENT="$APP_DIR/current"
-            TS="$(date +%Y%m%d_%H%M%S)"
-            NEW_RELEASE="$RELEASES/$TS"
-
-            mkdir -p "$NEW_RELEASE"
-            cp -r /tmp/myfirstapp_publish/out/* "$NEW_RELEASE/"
-            chown -R deploy:deploy "$NEW_RELEASE"
-            ln -sfn "$NEW_RELEASE" "$CURRENT"
-
-            sudo /usr/bin/systemctl daemon-reload
-            sudo /usr/bin/systemctl restart ${{ env.SERVICE_NAME }}
-            sudo /usr/bin/systemctl status ${{ env.SERVICE_NAME }} --no-pager
-
-            rm -rf /tmp/myfirstapp_publish
-
-            # keep last 5 releases
-            cd "$RELEASES"
-            ls -1dt */ | tail -n +6 | xargs -r rm -rf
-          '
+     steps:
+      - name: Say hello
+        run: echo "Hello from gitACt"
+    
+    
