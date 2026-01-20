@@ -22,5 +22,5 @@ jobs:
           APP_NAME: testapp
         run: | 
            echo "App=$APP_NAME"
-           echo "USER=$VPS_USER"
+           echo "USER=$USER"
         
