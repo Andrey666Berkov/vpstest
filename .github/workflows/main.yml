@@ -5,22 +5,39 @@ on:
     branches: [ "master" ]
 
 jobs:
-  hello:
+ 
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout rep 
-        uses: actions/checkout@v4
+      - name: startup 
+        uses: actions/checkout@v4            
       
-      - name: Say hello
-        run: echo "Hello from GitHub Actions"
+      - name: setup .Net
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
 
-      - name: Print env
-        env:
-          HOST: ${{ secrets.VPS_HOST }}
-          USER: ${{ secrets.VPS_USER }}
-          APP_NAME: testapp
-        run: | 
-          echo "App=$APP_NAME"
-          echo "USER=$USER"
+      - name: Restore
+        working-directory: backend
+        run: dotnet restore
+
+      - name: Build
+        working-directory: backend
+        run: dotnet build -c Release --no-build
+
+      - name: Test
+        working-directory: backend
+        run: dotnet test -c Release --no-build
+
+        
+  front:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Setup node
+        uses: actions/setup-node@v4      
+        with:
+          node-version: 20
+          cache: npm
         
