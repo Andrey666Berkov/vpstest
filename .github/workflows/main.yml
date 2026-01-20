@@ -11,3 +11,6 @@ jobs:
     steps:
       - name: Say hello
         run: echo "Hello from GitHub Actions"
+
+      - name: Test
+        run: ls -la 
