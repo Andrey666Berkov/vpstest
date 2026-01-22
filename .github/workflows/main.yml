@@ -43,6 +43,9 @@ jobs:
       - name: Test (project)      
         run: dotnet test TestProject1/TestProject1.csproj -c Release 
 
+      - name: Set release name
+        run: echo "RELEASE=$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV         
+
       - name: Upload publish to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -50,7 +53,7 @@ jobs:
           username:  ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
           source: "FirstApiWeb/out/*"
-          target: "/var/www/myfirstapp/releases/new"
+          target: "/var/www/myfirstapp/releases/${{ env.RELEASE }}"
 
       - name: Active release
         uses: appleboy/ssh-action@v1.0.3
@@ -59,8 +62,8 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
           script: |
-            set -e
-            sudo ln -sfn /var/www/myfirstapp/releases/new /var/www/myfirstapp/current
+            set -e            
+            sudo ln -sfn /var/www/myfirstapp/releases/${{ env.RELEASE }} /var/www/myfirstapp/current
             sudo systemctl restart myfirstapp
      
        
