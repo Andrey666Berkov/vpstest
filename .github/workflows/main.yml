@@ -53,6 +53,27 @@ jobs:
             which tar
             tar --version
 
+      - name: appleboy/scp-action TEST upload to /tmp
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          port: 22
+          debug: true
+
+          # грузим ОДИН файл, чтобы было проще
+          source: "FirstApiWeb/out/FirstApiWeb.dll"
+
+          # ВАЖНО: без завершающего /
+          target: "/tmp/scp_action_test/${{ env.RELEASE }}"
+
+          overwrite: true
+          rm: false
+
+    # ВАЖНО: явный tar (на всякий)
+    tar_exec: "/usr/bin/tar"
+
       - name: Restart upp on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
