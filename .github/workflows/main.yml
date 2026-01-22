@@ -38,7 +38,7 @@ jobs:
         run:  ls -la 
         
       - name: Test (project)      
-        run: dotnet test TestProject1/TestProject1.csproj -c Release --no-build --no-restore
+        run: dotnet test TestProject1/TestProject1.csproj -c Release 
 
 
       - name: Show files2
