@@ -28,11 +28,18 @@ jobs:
 
       - name: Build
         working-directory: FirstApiWeb
-        run: dotnet build -c Release 
+        run: dotnet build -c Release --no-restore
+
+      - name: Publish
+        working-directory: FirstApiWeb
+        run: dotnet publish -c Release -o out       
 
       - name: Test
         working-directory: FirstApiWeb
         run: dotnet test -c Release --no-build
+
+      - name: Show files
+        run: ls -la FirstApiWeb
 
  
         
