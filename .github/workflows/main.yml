@@ -34,13 +34,9 @@ jobs:
         working-directory: FirstApiWeb
         run: dotnet publish -c Release -o out --no-build --no-restore --no-build    
 
-      - name: Test
-        working-directory: TestProject1
-        run: dotnet test TestProject1.csproj -c Release --no-build --no-restore
+      - name: Test (project)
+        run: dotnet test TestProject1/TestProject1.csproj -c Release --no-build --no-restore
 
-      - name: Verbose test
-        working-directory: TestProject1
-        run: dotnet test FirstApiWeb.sln -c Release -v normal
 
       - name: Show files
         run:  ls -la 
