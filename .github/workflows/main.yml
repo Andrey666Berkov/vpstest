@@ -31,11 +31,14 @@ jobs:
       - name: Publish       
         run: dotnet publish -c Release -o out --no-build --no-restore --no-build    
 
-      - name: Test (project)
-        run: dotnet test TestProject1.csproj -c Release --no-build --no-restore
-
-
       - name: Show files
+        run:  ls -la 
+        
+      - name: Test (project)
+        run: dotnet test TestProject1/TestProject1.csproj -c Release --no-build --no-restore
+
+
+      - name: Show files2
         run:  ls -la 
 
  
