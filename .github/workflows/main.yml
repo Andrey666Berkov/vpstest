@@ -49,7 +49,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username:  $ {{ secrets.VPS_NAME }}
           key: ${{ secrets.VPS_KEY }}
-          source: "out/*"
+          source: "FirstApiWeb/out/*"
           target: "/var/www/myfirstapp/releases/new"
 
       - name: Active release
