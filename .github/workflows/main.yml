@@ -71,8 +71,8 @@ jobs:
           overwrite: true
           rm: false
 
-    # ВАЖНО: явный tar (на всякий)
-    tar_exec: "/usr/bin/tar"
+          # ВАЖНО: явный tar (на всякий)
+          tar_exec: "/usr/bin/tar"
 
       - name: Restart upp on VPS
         uses: appleboy/ssh-action@v1.0.3
