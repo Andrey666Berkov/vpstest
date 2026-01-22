@@ -11,7 +11,11 @@ jobs:
 
     steps:
       - name: startup 
-        uses: actions/checkout@v4            
+        uses: actions/checkout@v4 
+
+      - name: ChecWorkDirectory
+        run: ls -la
+         
       
       - name: setup .Net
         uses: actions/setup-dotnet@v4
