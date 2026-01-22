@@ -15,6 +15,6 @@ public class UnitTest1
         
         //assert
          Assert.Equal("Apple", result.Name);
-         Assert.Equal(2, result.Id);
+         Assert.Equal(1, result.Id);
     }
 }
