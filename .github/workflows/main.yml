@@ -25,17 +25,19 @@ jobs:
       - name: Restore       
         run: dotnet restore
 
-      - name: Build        
+      - name: Build 
+        working-directory: FirstWebApp
         run: dotnet build -c Release --no-restore
 
-      - name: Publish       
+      - name: Publish
+        working-directory: FirstWebApp
         run: dotnet publish -c Release -o out --no-build --no-restore --no-build    
 
       - name: Show files
         run:  ls -la 
         
-      - name: Test (project)
-        run: dotnet test TestProject1/TestProject1.csproj -c Release --no-build --no-restore
+      - name: Test (project)      
+        run: dotnet test FirstWebApp/TestProject1/TestProject1.csproj -c Release --no-build --no-restore
 
 
       - name: Show files2
