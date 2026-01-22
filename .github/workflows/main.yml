@@ -40,6 +40,19 @@ jobs:
       - name: Set release name
         run: echo "RELEASE=$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV         
 
+      - name: Prepare release dir on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          script: |
+            set -euxo pipefail
+            mkdir -p /tmp/scp_action_test/${{ env.RELEASE }}
+            ls -ld /tmp /tmp/scp_action_test /tmp/scp_action_test/${{ env.RELEASE }}
+            which tar
+            tar --version
+
       - name: Restart upp on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -49,38 +62,7 @@ jobs:
           script: |
             set -e
             mkdir -p /var/www/myfirstapp/releases/${{ env.RELEASE }}           
-            ls -ld /var/www/myfirstapp/releases/${{ env.RELEASE }}
-          
- 
-      - name: Native scp test (no appleboy)
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_KEY: ${{ secrets.VPS_KEY }}
-        run: |
-         set -euxo pipefail
-
-         mkdir -p ~/.ssh
-         echo "$VPS_KEY" > ~/.ssh/id_ed25519
-         chmod 600 ~/.ssh/id_ed25519
-         ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
-
-         echo "HELLO $(date -u)" > test_scp.txt
-
-         scp -vvv -i ~/.ssh/id_ed25519 test_scp.txt \
-         "$VPS_USER@$VPS_HOST:/tmp/test_scp.txt"
-
-         ssh -i ~/.ssh/id_ed25519 "$VPS_USER@$VPS_HOST" \
-         "ls -la /tmp/test_scp.txt && cat /tmp/test_scp.txt"
-      
-      - name: Native sftp test (batch)
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-        run: |
-          set -euxo pipefail
-          printf "ls -la /tmp\nput test_scp.txt /tmp/test_sftp.txt\nls -la /tmp/test_sftp.txt\nbye\n" > sftp_batch.txt
-          sftp -vvv -b sftp_batch.txt -i ~/.ssh/id_ed25519 "$VPS_USER@$VPS_HOST"
+            ls -ld /var/www/myfirstapp/releases/${{ env.RELEASE }}  
       
       - name: Verify uploaded files on VPS
         uses: appleboy/ssh-action@v1.0.3
