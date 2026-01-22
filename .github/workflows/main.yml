@@ -32,11 +32,11 @@ jobs:
 
       - name: Publish
         working-directory: FirstApiWeb
-        run: dotnet publish -c Release -o out       
+        run: dotnet publish -c Release -o out --no-build --no-restore --no-build    
 
       - name: Test
-        working-directory: FirstApiWeb
-        run: dotnet test -c Release -o out --no-build --no-restore --no-build
+        working-directory: FirstApiWeb.Tests
+        run: dotnet test -c Release --no.build
 
       - name: Show files
         run: ls -la FirstApiWeb
