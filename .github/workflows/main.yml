@@ -5,9 +5,41 @@ on:
     branches: [ "master" ]
 
 jobs:
-  hello:
+ 
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Say hello
-        run: echo "Hello from GitHub Actions"
+      - name: startup 
+        uses: actions/checkout@v4 
+
+      - name: ChecWorkDirectory      
+        run: ls -la
+         
+      
+      - name: setup .Net       
+        uses: actions/setup-dotnet@v4        
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        working-directory: FirstApiWeb
+        run: dotnet restore
+
+      - name: Build
+        working-directory: FirstApiWeb
+        run: dotnet build -c Release --no-restore
+
+      - name: Publish
+        working-directory: FirstApiWeb
+        run: dotnet publish -c Release -o out       
+
+      - name: Test
+        working-directory: FirstApiWeb
+        run: dotnet test -c Release -o out --no-build --no-restore --no-build
+
+      - name: Show files
+        run: ls -la FirstApiWeb
+
+ 
+        
