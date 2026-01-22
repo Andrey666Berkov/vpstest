@@ -36,13 +36,33 @@ jobs:
 
       - name: Show files
         run:  ls -la 
+
+      - name: Show filee in out
+        run:  ls -la FirstApiWeb/out/
         
       - name: Test (project)      
         run: dotnet test TestProject1/TestProject1.csproj -c Release 
 
+      - name: Upload publish to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username:  $ {{ secrets.VPS_NAME }}
+          source: "out/*"
+          target: "/var/www/myfirstapp/releases/new"
 
-      - name: Show files2
-        run:  ls -la 
+      - name: Active release
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_NAME }}
+          key: ${{ secrets.VPS_KEY }}
+          script: |
+            set -e
+            sudo ln -sfn /var/www/myfirstapp/releases/new /var/www/myfirstapp/current
+            sudo systemctl restart myfirstapp
+     
+       
 
  
         
