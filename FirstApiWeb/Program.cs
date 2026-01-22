@@ -1,9 +1,11 @@
+using FirstApiWeb.Controllers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddSingleton<ProductsService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("react", p =>

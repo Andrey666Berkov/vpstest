@@ -6,25 +6,21 @@ namespace FirstApiWeb.Controllers;
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
 {
-    // "База данных" в памяти
-    private static readonly List<Product> _products = new()
-    {
-        new Product { Id = 1, Name = "Apple", Price = 1.5m },
-        new Product { Id = 2, Name = "Bread", Price = 2.2m },
-        new Product { Id = 3, Name = "Peta", Price = 3.3m },
-        new Product { Id = 4, Name = "GOGa", Price = 7.7m },
-    };
+    private readonly ProductsService _service;
 
-    private static int _nextId = 3;
+    public ProductsController(ProductsService service)
+    {
+        _service = service;
+    }
 
     [HttpGet]
     public ActionResult<List<Product>> GetAll()
-        => Ok(_products);
+        => Ok(_service.GetAll());
 
     [HttpGet("{id:int}")]
     public ActionResult<Product> GetById(int id)
     {
-        var p = _products.FirstOrDefault(x => x.Id == id);
+        var p = _service.GetById(id);
         return p is null ? NotFound() : Ok(p);
     }
 
@@ -33,37 +29,28 @@ public class ProductsController : ControllerBase
     [HttpPost]
     public ActionResult<Product> Create([FromBody] CreateProductDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Name))
-            return BadRequest("Name is required");
+        var (ok, error, product) = _service.Create(dto.Name, dto.Price);
+        if (!ok) return BadRequest(error);
 
-        var p = new Product { Id = _nextId++, Name = dto.Name, Price = dto.Price };
-        _products.Add(p);
-
-        return CreatedAtAction(nameof(GetById), new { id = p.Id }, p);
+        return CreatedAtAction(nameof(GetById), new { id = product!.Id }, product);
     }
-//.........
+
     public record UpdateProductDto(string Name, decimal Price);
 
     [HttpPut("{id:int}")]
     public ActionResult<Product> Update(int id, [FromBody] UpdateProductDto dto)
     {
-        var p = _products.FirstOrDefault(x => x.Id == id);
-        if (p is null) return NotFound();
+        var ok = _service.Update(id, dto.Name, dto.Price, out var updated);
+        if (!ok) return NotFound();
 
-        p.Name = dto.Name;
-        p.Price = dto.Price;
-
-        return Ok(p);
+        return Ok(updated);
     }
 
     [HttpDelete("{id:int}")]
     public IActionResult Delete(int id)
     {
-        var p = _products.FirstOrDefault(x => x.Id == id);
-        if (p is null) return NotFound();
-
-        _products.Remove(p);
-        return NoContent();
+        var ok = _service.Delete(id);
+        return ok ? NoContent() : NotFound();
     }
 }
 
