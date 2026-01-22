@@ -53,7 +53,11 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
           script: |
-            mkdir /var/www/myfirstapp/releases/${{ env.RELEASE }}
+            set -e
+            mkdir -p /var/www/myfirstapp/releases/${{ env.RELEASE }}
+            touch /var/www/myfirstapp/releases/${{ env.RELEASE }}/_write_test
+            rm /var/www/myfirstapp/releases/${{ env.RELEASE }}/_write_test
+            echo "WRITE OK"
             ls -ld /var/www/myfirstapp/releases/${{ env.RELEASE }}
       
       - name: Upload publish to VPS
