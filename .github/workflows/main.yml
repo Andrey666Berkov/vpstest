@@ -19,25 +19,13 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        working-directory: backend
         run: dotnet restore
 
       - name: Build
-        working-directory: backend
         run: dotnet build -c Release --no-build
 
       - name: Test
-        working-directory: backend
         run: dotnet test -c Release --no-build
 
-        
-  front:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Setup node
-        uses: actions/setup-node@v4      
-        with:
-          node-version: 20
-          cache: npm
+ 
         
