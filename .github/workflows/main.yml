@@ -13,22 +13,25 @@ jobs:
       - name: startup 
         uses: actions/checkout@v4 
 
-      - name: ChecWorkDirectory
+      - name: ChecWorkDirectory      
         run: ls -la
          
       
-      - name: setup .Net
-        uses: actions/setup-dotnet@v4
+      - name: setup .Net       
+        uses: actions/setup-dotnet@v4        
         with:
           dotnet-version: 10.0.x
 
       - name: Restore
+        working-directory: FirstApiWeb
         run: dotnet restore
 
       - name: Build
+        working-directory: FirstApiWeb
         run: dotnet build -c Release --no-build
 
       - name: Test
+        working-directory: FirstApiWeb
         run: dotnet test -c Release --no-build
 
  
