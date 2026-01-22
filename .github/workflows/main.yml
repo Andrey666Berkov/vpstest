@@ -36,7 +36,7 @@ jobs:
 
       - name: Test
         working-directory: TestProject1
-        run: dotnet test FirstApiWeb.sln -c Release --no-build --no-restore
+        run: dotnet test TestProject1.csproj -c Release --no-build --no-restore
 
       - name: Verbose test
         working-directory: TestProject1
