@@ -26,5 +26,5 @@ app.UseCors("react");
 app.MapControllers();
 
 app.Run();
-//....ююютbdfcsdffgb
+//....ююютbdfcsdffgbю
 
