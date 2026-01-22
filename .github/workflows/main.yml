@@ -22,11 +22,11 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Restore
+      - name: Restore 
         working-directory: FirstApiWeb
         run: dotnet restore
 
-      - name: Build
+      - name: Build 
         working-directory: FirstApiWeb
         run: dotnet build -c Release --no-restore
 
@@ -34,11 +34,14 @@ jobs:
         working-directory: FirstApiWeb
         run: dotnet publish -c Release -o out --no-build --no-restore --no-build    
 
-      - name: Test
-        working-directory: Tests
-        run: dotnet test -c Release --no-build
-
       - name: Show files
+        run:  ls -la 
+        
+      - name: Test (project)      
+        run: dotnet test TestProject1/TestProject1.csproj -c Release 
+
+
+      - name: Show files2
         run:  ls -la 
 
  
