@@ -14,6 +14,7 @@ public class UnitTest1
         var result=controller.GetById(1);
         
         //assert
-        if (result != null) Assert.Equal("Apple", result.Name);
+         Assert.Equal("Apple", result.Name);
+         Assert.Equal(2, result.Id);
     }
 }
