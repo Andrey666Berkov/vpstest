@@ -35,16 +35,21 @@ jobs:
       
       - name: Publish
         working-directory: FirstApiWeb
-        run: dotnet publish -c Release -o out --no-build --no-restore   
-
-      - name: Show files
-        run:  ls -la 
-
-      - name: Show filee in out
-        run:  ls -la FirstApiWeb/out/      
+        run: dotnet publish -c Release -o out --no-build --no-restore       
 
       - name: Set release name
         run: echo "RELEASE=$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV         
+
+      - name: SCP single file to /tmp (test)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          debug: true
+          host: ${{ secrets.VPS_HOST }}
+          username:  ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          source: "FirstApiWeb/out/FirstApiWeb.dll"
+          target: "/tmp"
+          overwrite: true
 
       - name: Restart upp on VPS
         uses: appleboy/ssh-action@v1.0.3
