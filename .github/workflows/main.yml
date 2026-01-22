@@ -54,29 +54,9 @@ jobs:
           key: ${{ secrets.VPS_KEY }}
           script: |
             set -e
-            mkdir -p /var/www/myfirstapp/releases/${{ env.RELEASE }}
-            touch /var/www/myfirstapp/releases/${{ env.RELEASE }}/_write_test
-            rm /var/www/myfirstapp/releases/${{ env.RELEASE }}/_write_test
-            echo "WRITE OK"
+            mkdir -p /var/www/myfirstapp/releases/${{ env.RELEASE }}           
             ls -ld /var/www/myfirstapp/releases/${{ env.RELEASE }}
-
-      - name: Diagnose VPS (tar/space/permissions)
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_KEY }}
-          script: |
-            set -euxo pipefail
-            whoami
-            pwd
-            which tar || true
-            tar --version || true
-            df -h
-            namei -l /var/www/myfirstapp/releases/${{ env.RELEASE }} || true
-            ls -ld /var /var/www /var/www/myfirstapp /var/www/myfirstapp/releases /var/www/myfirstapp/releases/${{ env.RELEASE }} || true
-
-      
+           
       - name: Upload publish to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -86,6 +66,18 @@ jobs:
           key: ${{ secrets.VPS_KEY }}
           source: "FirstApiWeb/out/*"
           target: "/var/www/myfirstapp/releases/${{ env.RELEASE }}"
+          strip_components: 2
+          overwrite: true  
+    
+      - name: Verify uploaded files on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          script: |
+            set -e
+            ls -la /var/www/myfirstapp/releases/${{ env.RELEASE }}
 
       - name: Active release
         uses: appleboy/ssh-action@v1.0.3
