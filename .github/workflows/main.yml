@@ -32,7 +32,7 @@ jobs:
 
       - name: Publish
         working-directory: FirstApiWeb
-        run: dotnet publish -c Release -o out --no-build --no-restore --no-build    
+        run: dotnet publish -c Release -o out --no-build --no-restore   
 
       - name: Show files
         run:  ls -la 
@@ -47,7 +47,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
-          username:  $ {{ secrets.VPS_NAME }}
+          username:  ${{ secrets.VPS_NAME }}
           key: ${{ secrets.VPS_KEY }}
           source: "FirstApiWeb/out/*"
           target: "/var/www/myfirstapp/releases/new"
