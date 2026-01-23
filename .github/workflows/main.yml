@@ -1,66 +1,34 @@
-name: Hello Actions
+name: Deploy to VPS
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
 jobs:
- 
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: startup 
-        uses: actions/checkout@v4 
+      - uses: actions/checkout@v4
 
-      - name: ChecWorkDirectory      
-        run: ls -la
-         
-      
-      - name: setup .Net       
-        uses: actions/setup-dotnet@v4        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 8.0.x
 
-      - name: Restore 
-        working-directory: FirstApiWeb
-        run: dotnet restore
-
-      - name: Build 
-        working-directory: FirstApiWeb
-        run: dotnet build -c Release --no-restore
-      
-      - name: Test (project)      
-        run: dotnet test TestProject1/TestProject1.csproj -c Release 
-      
       - name: Publish
-        working-directory: FirstApiWeb
-        run: dotnet publish -c Release -o out --no-build --no-restore       
+        run: dotnet publish -c Release -o out
 
-      - name: Set release name
-        run: echo "RELEASE=$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV         
-      
-      - name: appleboy scp test to /tmp
-        id: scp_test
+      - name: Upload to VPS
         uses: appleboy/scp-action@v0.1.7
-        continue-on-error: true
         with:
-          debug: true
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
+          source: "out/*"
+          target: "/var/www/myapp/releases/new"
 
-          source: "FirstApiWeb/out/FirstApiWeb.dll"
-          target: "/tmp/scp_action_test/${{ env.RELEASE }}"
-          overwrite: true
-
-          tar_tmp_path: "/tmp"
-          rm: false     
-      
-
-         
-
-      - name: Restart upp on VPS
+      - name: Restart service
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -68,36 +36,5 @@ jobs:
           key: ${{ secrets.VPS_KEY }}
           script: |
             set -e
-            mkdir -p /var/www/myfirstapp/releases/${{ env.RELEASE }}           
-            ls -ld /var/www/myfirstapp/releases/${{ env.RELEASE }}      
-     
-      - name: Verify after appleboy scp
-        if: always()
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_KEY }}
-          script: |
-            set -euxo pipefail
-            ls -la /tmp/scp_action_test/${{ env.RELEASE }} || true
-            find /tmp/scp_action_test/${{ env.RELEASE }} -maxdepth 2 -type f -printf "%p (%s bytes)\n" || true
-            ls -la /tmp | tail -n 50 || true
-
-      
-     
-      - name: Active release
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_KEY }}
-          script: |
-            set -e            
-            ln -sfn /var/www/myfirstapp/releases/${{ env.RELEASE }} /var/www/myfirstapp/current
-            systemctl restart myfirstapp
-     
-       
-
- 
-        
+            sudo ln -sfn /var/www/myapp/releases/new /var/www/myapp/current
+            sudo systemctl restart myapp
