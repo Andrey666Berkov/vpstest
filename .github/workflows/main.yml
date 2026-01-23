@@ -39,37 +39,24 @@ jobs:
 
       - name: Set release name
         run: echo "RELEASE=$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV         
-
-      - name: Prepare release dir on VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_KEY }}
-          script: |
-            set -euxo pipefail
-            mkdir -p /tmp/scp_action_test/${{ env.RELEASE }}
-            ls -ld /tmp /tmp/scp_action_test /tmp/scp_action_test/${{ env.RELEASE }}
-            which tar
-            tar --version
-
-      - name: appleboy/scp-action TEST upload to /tmp
+      
+      - name: appleboy scp test to /tmp
+        id: scp_test
         uses: appleboy/scp-action@v0.1.7
+        continue-on-error: true
         with:
+          debug: true
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
-          port: 22
-          debug: true
 
-          # грузим ОДИН файл, чтобы было проще
           source: "FirstApiWeb/out/FirstApiWeb.dll"
-
-          # ВАЖНО: без завершающего /
           target: "/tmp/scp_action_test/${{ env.RELEASE }}"
-
           overwrite: true
-          rm: false
+
+          tar_tmp_path: "/tmp"
+          rm: false     
+      
 
          
 
@@ -82,17 +69,22 @@ jobs:
           script: |
             set -e
             mkdir -p /var/www/myfirstapp/releases/${{ env.RELEASE }}           
-            ls -ld /var/www/myfirstapp/releases/${{ env.RELEASE }}  
-      
-      - name: Verify uploaded files on VPS
+            ls -ld /var/www/myfirstapp/releases/${{ env.RELEASE }}      
+     
+      - name: Verify after appleboy scp
+        if: always()
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
           script: |
-            set -e
-            ls -la /var/www/myfirstapp/releases/${{ env.RELEASE }}  
+            set -euxo pipefail
+            ls -la /tmp/scp_action_test/${{ env.RELEASE }} || true
+            find /tmp/scp_action_test/${{ env.RELEASE }} -maxdepth 2 -type f -printf "%p (%s bytes)\n" || true
+            ls -la /tmp | tail -n 50 || true
+
+      
      
       - name: Active release
         uses: appleboy/ssh-action@v1.0.3
