@@ -1,4 +1,4 @@
-name: Deploy myfirstapp to VPS
+name: Deploy FirstApiWeb to VPS
 
 on:
   push:
@@ -17,13 +17,10 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      # Если решение/проект в подпапке — поменяй PROJECT_DIR
-      - name: Publish
-        env:
-          PROJECT_DIR: FirstApiWeb
+      - name: Publish FirstApiWeb
         run: |
           set -e
-          dotnet publish "$PROJECT_DIR" -c Release -o out
+          dotnet publish FirstApiWeb/FirstApiWeb.csproj -c Release -o out
 
       - name: Create release dir on VPS (timestamp)
         uses: appleboy/ssh-action@v1.0.3
@@ -37,7 +34,7 @@ jobs:
             echo "RELEASE_DIR=/var/www/myfirstapp/releases/$TS" >> $GITHUB_ENV
             mkdir -p "/var/www/myfirstapp/releases/$TS"
 
-      - name: Upload publish output to release dir
+      - name: Upload publish output to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -46,7 +43,7 @@ jobs:
           source: "out/*"
           target: "${{ env.RELEASE_DIR }}"
 
-      - name: Switch current + restart systemd
+      - name: Switch current + restart service
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
