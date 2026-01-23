@@ -38,4 +38,3 @@ jobs:
             set -e
             sudo ln -sfn /var/www/myapp/releases/new /var/www/myapp/current
             sudo systemctl restart myapp
-            
