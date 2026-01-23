@@ -72,7 +72,7 @@ jobs:
           key: ${{ secrets.VPS_KEY }}
           port: ${{ secrets.VPS_PORT }}
           source: "compose.yaml,.env"
-          target: "/opt/firstapi/db"
+          target: "/opt/firstapi/db/"
           overwrite: true
 
       # 8) переключаем current и рестартим сервис
