@@ -20,7 +20,7 @@ jobs:
       # Если решение/проект в подпапке — поменяй PROJECT_DIR
       - name: Publish
         env:
-          PROJECT_DIR: .
+          PROJECT_DIR: FirstApiWeb
         run: |
           set -e
           dotnet publish "$PROJECT_DIR" -c Release -o out
