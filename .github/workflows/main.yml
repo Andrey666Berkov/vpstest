@@ -62,7 +62,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
-          source: "infra/db/docker-compose.yml,infra/db/.env"
+          source: "compose.yml,.env"
           target: "/opt/firstapi/db/"
 
       # 8) переключаем current и рестартим сервис
@@ -74,7 +74,7 @@ jobs:
           key: ${{ secrets.VPS_KEY }}          
           script: |
             set -e 
-            Postgres (если не запущен — запустится)
+            # Postgres (если не запущен — запустится)
             cd /opt/firstapi/db
             docker compose up -d
             # переключаем current на новый релиз
