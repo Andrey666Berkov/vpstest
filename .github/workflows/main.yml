@@ -67,7 +67,7 @@ jobs:
 
       # 8) переключаем current и рестартим сервис
       - name: Switch current + restart service
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
