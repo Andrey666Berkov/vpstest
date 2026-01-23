@@ -68,7 +68,7 @@ jobs:
           script: |
             set -e
             APP_DIR="/var/www/firstapi"
-            REL="$APP_DIR/releases/${{ github.run_id }}"
+            REL="$APP_DIR/releases/${{ github.run_id }}/publish"
 
             # переключаем current на новый релиз
             ln -sfn "$REL" "$APP_DIR/current"
