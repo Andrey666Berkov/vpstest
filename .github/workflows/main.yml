@@ -1,48 +1,80 @@
-name: Hello Actions
+name: Deploy ASP.NET (FirstApiWeb) to VPS
 
 on:
   push:
     branches: [ "master" ]
 
 jobs:
- 
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: startup 
-        uses: actions/checkout@v4 
+      # 1) забираем код
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: ChecWorkDirectory      
-        run: ls -la
-         
-      
-      - name: setup .Net       
-        uses: actions/setup-dotnet@v4        
+      # 2) ставим .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: "10.0.x"
 
-      - name: Restore 
-        working-directory: FirstApiWeb
+      # 3) restore
+      - name: Restore
         run: dotnet restore
 
-      - name: Build 
-        working-directory: FirstApiWeb
-        run: dotnet build -c Release --no-restore
+      # 4) tests
+      - name: Test
+        run: dotnet test -c Release --no-restore
 
+      # 5) publish (важно: указываем csproj твоего API)
       - name: Publish
-        working-directory: FirstApiWeb
-        run: dotnet publish -c Release -o out --no-build --no-restore --no-build    
+        run: dotnet publish ./FirstApiWeb/FirstApiWeb.csproj -c Release -o publish --no-restore
 
-      - name: Show files
-        run:  ls -la 
-        
-      - name: Test (project)      
-        run: dotnet test TestProject1/TestProject1.csproj -c Release 
+      # 6) создаём папку релиза на VPS
+      - name: Prepare release folder on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+            APP_DIR="/var/www/firstapi"
+            REL="$APP_DIR/releases/${{ github.run_id }}"
+            mkdir -p "$REL"
+            echo "Release folder: $REL"
 
+      # 7) заливаем publish на VPS в releases/<run_id>/
+      - name: Upload publish to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          source: "publish/*"
+          target: "/var/www/firstapi/releases/${{ github.run_id }}/"
 
-      - name: Show files2
-        run:  ls -la 
+      # 8) переключаем current и рестартим сервис
+      - name: Switch current + restart service
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+            APP_DIR="/var/www/firstapi"
+            REL="$APP_DIR/releases/${{ github.run_id }}/publish"
 
- 
-        
+            # переключаем current на новый релиз
+            ln -sfn "$REL" "$APP_DIR/current"
+
+            # рестарт сервиса (должен быть sudo без пароля)
+            sudo systemctl restart firstapi
+
+            # покажем статус в логах GitHub Actions
+            sudo systemctl --no-pager --full status firstapi | head -n 40
