@@ -1,4 +1,4 @@
-name: Deploy to VPS
+name: Deploy myfirstapp to VPS
 
 on:
   push:
@@ -9,29 +9,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: "10.0.x"
 
+      # Если решение/проект в подпапке — поменяй PROJECT_DIR
       - name: Publish
-        run: dotnet publish -c Release -o out
+        env:
+          PROJECT_DIR: .
+        run: |
+          set -e
+          dotnet publish "$PROJECT_DIR" -c Release -o out
 
-      - name: Look
-        run: ls -la
-
-      - name: Upload to VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_KEY }}
-          source: "out/*"
-          target: "/var/www/myapp/releases/new"
-
-      - name: Restart service
+      - name: Create release dir on VPS (timestamp)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -39,5 +33,27 @@ jobs:
           key: ${{ secrets.VPS_KEY }}
           script: |
             set -e
-            sudo ln -sfn /var/www/myapp/releases/new /var/www/myapp/current
-            sudo systemctl restart myapp
+            TS="$(date +%Y%m%d_%H%M%S)"
+            echo "RELEASE_DIR=/var/www/myfirstapp/releases/$TS" >> $GITHUB_ENV
+            mkdir -p "/var/www/myfirstapp/releases/$TS"
+
+      - name: Upload publish output to release dir
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          source: "out/*"
+          target: "${{ env.RELEASE_DIR }}"
+
+      - name: Switch current + restart systemd
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          script: |
+            set -e
+            sudo ln -sfn "${{ env.RELEASE_DIR }}" /var/www/myfirstapp/current
+            sudo systemctl restart myfirstapp
+            sudo systemctl --no-pager --full status myfirstapp || true
