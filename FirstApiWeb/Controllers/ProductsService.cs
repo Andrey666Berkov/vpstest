@@ -9,6 +9,9 @@ public class ProductsService
         new Product { Id = 2, Name = "Bread", Price = 2.2m },
         new Product { Id = 3, Name = "Peta", Price = 3.3m },
         new Product { Id = 4, Name = "GOGa", Price = 7.7m },
+        new Product { Id = 5, Name = "GOGa", Price = 8.7m },
+        new Product { Id = 6, Name = "GOGa", Price = 9.7m },
+        
     };
 
     private static int _nextId = _products.Max(p => p.Id) + 1;
