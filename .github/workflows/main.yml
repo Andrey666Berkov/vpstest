@@ -63,7 +63,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
           source: "compose.yaml,.env"
-          target: "/opt/firstapi/db/"
+          target: "/opt/firstapi/db"
 
       # 8) переключаем current и рестартим сервис
       - name: Switch current + restart service
