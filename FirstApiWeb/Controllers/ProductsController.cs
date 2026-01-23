@@ -6,9 +6,9 @@ namespace FirstApiWeb.Controllers;
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
 {
-    private readonly ProductsService _service;
+    private readonly IProductService _service;
 
-    public ProductsController(ProductsService service)
+    public ProductsController(IProductService service)
     {
         _service = service;
     }
@@ -59,4 +59,10 @@ public class Product
     public int Id { get; set; }
     public string Name { get; set; } = "";
     public decimal Price { get; set; }
+
+    public Product(string name, decimal price)
+    {
+        Price = price;
+        Name = name;
+    }
 }
