@@ -70,8 +70,10 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
+          port: ${{ secrets.VPS_PORT }}
           source: "compose.yaml,.env"
           target: "/opt/firstapi/db"
+          overwrite: true
 
       # 8) переключаем current и рестартим сервис
       - name: Switch current + restart service
