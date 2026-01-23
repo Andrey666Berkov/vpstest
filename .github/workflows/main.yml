@@ -18,6 +18,14 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            **/*.fsproj
+            **/*.props
+            **/*.targets
+            **/packages.lock.json
+            NuGet.config
 
       # 3) restore
       - name: Restore
