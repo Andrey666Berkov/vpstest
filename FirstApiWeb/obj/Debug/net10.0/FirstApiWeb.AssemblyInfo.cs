@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FirstApiWeb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8fb25140374822e57d077caccb8355902fc2023f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+07ac4ef1f439e407fe6ca8d6847003182829543d")]
 [assembly: System.Reflection.AssemblyProductAttribute("FirstApiWeb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FirstApiWeb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
