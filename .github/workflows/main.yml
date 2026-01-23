@@ -19,6 +19,9 @@ jobs:
       - name: Publish
         run: dotnet publish -c Release -o out
 
+      - name: Look
+        run: ls -la
+
       - name: Upload to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
